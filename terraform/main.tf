@@ -568,43 +568,6 @@ resource "aws_glue_catalog_table" "cloudwatch_collector_table" {
 # Collect Resource Data Lambda - cloudwatch_collect
 ################################################################################
 
-resource "aws_grafana_workspace" "cloud_sustainability_dashboard" {
-  count                    = var.create_managed_grafana ? 1 : 0
-  name                     = local.workspace_name
-  account_access_type      = "CURRENT_ACCOUNT"
-  authentication_providers = ["AWS_SSO"]
-  permission_type          = "SERVICE_MANAGED"
-  data_sources             = ["CLOUDWATCH", "ATHENA"]
-  role_arn                 = aws_iam_role.dashboard_role[0].arn
-  depends_on = [
-    aws_iam_role.dashboard_role[0]
-  ]
-}
-
-resource "aws_iam_role" "dashboard_role" {
-  count = var.create_managed_grafana ? 1 : 0
-  name  = "cloud_sustainability_dashboard-role"
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Action = "sts:AssumeRole"
-        Effect = "Allow"
-        Sid    = ""
-        Principal = {
-          Service = "grafana.amazonaws.com"
-        }
-      },
-    ]
-  })
-  inline_policy {
-    name   = "grafana-sustainability-dash-pol"
-    policy = data.aws_iam_policy_document.dashboard_policy_document.json
-  }
-
-}
-
-
 data "aws_iam_policy_document" "dashboard_policy_document" {
 
   statement {
@@ -759,41 +722,3 @@ data "aws_iam_policy_document" "dashboard_policy_document" {
 }
 
 
-# resource "aws_grafana_workspace_api_key" "admin_key" {
-#   count = var.create_managed_grafana ? 1 : 0
-#   key_name        = "automation-admin-key"
-#   key_role        = "ADMIN"
-#   seconds_to_live = var.grafana_api_key_ttl
-#   workspace_id    = aws_grafana_workspace.cloud_sustainability_dashboard[0].id
-#   depends_on = [
-#     aws_grafana_workspace.cloud_sustainability_dashboard[0]
-#   ]
-# }
-
-# resource "grafana_data_source" "athena" {
-#   count = ( var.create_managed_grafana && var.create_grafana_datasources) ? 1 : 0
-#   type = "grafana-athena-datasource"
-#   name = "Amazon Athena - Sustainability Data"
-#   depends_on = [
-#     aws_grafana_workspace_api_key.admin_key
-#   ]
-
-#   json_data_encoded = jsonencode({
-#     auth_type      = "default"
-#     default_region = var.region
-#     catalog        = "AwsDataCatalog"
-#     database       = module.CUR_stack.database_name
-#     workgroup      = aws_athena_workgroup.this.name
-#   })
-#   provider = grafana.grafana
-# }
-
-# resource "grafana_dashboard" "cloud-sustainability-dashboard" {
-#   count = ( var.create_managed_grafana && var.create_grafana_datasources) ? 1 : 0
-#   config_json = file("grafana-dashboard.json")
-#   depends_on = [
-#     grafana_data_source.athena,
-#     grafana_data_source.test_db,
-#     grafana_data_source.cloudwatch
-#   ]
-# }
