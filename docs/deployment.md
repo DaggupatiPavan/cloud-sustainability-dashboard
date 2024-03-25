@@ -278,6 +278,11 @@ Using the AWS datasource page (not the Grafana data sources page) configure the 
 11. Go to Settings, rename and change as appropriate
 
 ### Part 4 - Grafana  Import Dashboard
+install grafana on local or a docker container.
+sudo docker run -itd -p 3000:3000 --restart unless-stopped grafana/grafana:latest
+
+add datasources AWS Athena and cloudwatch.
+
 12. Go to create menu (the + icon), click import
 13. Select Upload JSON file
 14. Upload [Sustainability Metrics Dashboard JSON](../terraform/grafana-dashboard.json)
