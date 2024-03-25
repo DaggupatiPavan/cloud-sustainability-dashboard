@@ -1,3 +1,13 @@
+resource "random_string" "example" {
+  length  = 6
+  special = false
+  upper   = false
+  number  = true
+  lower   = true
+}
+
+
+
 ################################################################################
 # AWS Cost and Usage Report setup
 ################################################################################
@@ -6,7 +16,7 @@ module "CUR_stack" {
   source          = "./modules/aws_cur_stack"
   cur_report_name = "sustainability-report"
   region          = var.region
-  s3_bucket       = var.cur_s3_bucket_name
+  s3_bucket       = var.cur_s3_bucket_name-"${random_string.example.result}"
 
   providers = {
     aws           = aws
